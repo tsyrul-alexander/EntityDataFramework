@@ -1,5 +1,5 @@
 ﻿namespace EntityDataFramework.Core.Models.Query.Contract {
-	public interface ISchemaQuery<T> {
+	public interface ISchemaQuery {
 		string SchemaName { get; set; }
 	}
 }
