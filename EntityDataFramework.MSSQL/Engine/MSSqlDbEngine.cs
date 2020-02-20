@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using System.Data.SqlClient;
 using EntityDataFramework.Core.Models.Command;
+using EntityDataFramework.Core.Models.Command.Contract;
 using EntityDataFramework.Core.Models.Engine;
 using EntityDataFramework.MSSQL.Command;
 using IDbCommand = System.Data.IDbCommand;

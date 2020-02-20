@@ -2,6 +2,7 @@
 using System.Data.SqlClient;
 using System.Linq;
 using EntityDataFramework.Core.Models.Command;
+using EntityDataFramework.Core.Models.Command.Abstraction;
 using EntityDataFramework.Core.Models.Engine;
 using EntityDataFramework.MSSQL.Utilities;
 

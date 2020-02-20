@@ -1,8 +1,8 @@
 ﻿using EntityDataFramework.Core.Models.Engine;
 using EntityDataFramework.Core.Models.Table;
 
-namespace EntityDataFramework.Core.Models.Command {
-	public class BaseCreateTableCommand : BaseDbExecuteExecuteNonQueryCommand {
+namespace EntityDataFramework.Core.Models.Command.Abstraction {
+	public abstract class BaseCreateTableCommand : BaseDbExecuteExecuteNonQueryCommand {
 		protected IEntityTable EntityTable { get; }
 		public BaseCreateTableCommand(IDbEngine dbEngine, IEntityTable entityTable) : base(dbEngine) {
 			EntityTable = entityTable;

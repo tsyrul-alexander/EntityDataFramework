@@ -1,5 +1,6 @@
 ﻿using System;
-using EntityDataFramework.Core.Models.Command;
+using EntityDataFramework.Core.Models.Command.Abstraction;
+using EntityDataFramework.Core.Models.Command.Contract;
 using EntityDataFramework.Core.Models.Engine;
 
 namespace EntityDataFramework.MSSQL.Command {

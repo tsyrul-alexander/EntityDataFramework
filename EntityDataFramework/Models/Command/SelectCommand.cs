@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using EntityDataFramework.Core.Models.Command.Abstraction;
 using EntityDataFramework.Core.Models.Condition;
 using EntityDataFramework.Core.Models.Query;
 using EntityDataFramework.Core.Models.Query.Column;

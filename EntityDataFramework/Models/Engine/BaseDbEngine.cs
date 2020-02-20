@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using EntityDataFramework.Core.Models.Command;
+using EntityDataFramework.Core.Models.Command.Contract;
 using EntityDataFramework.Core.Models.Table;
 using IDbCommand = System.Data.IDbCommand;
 

@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using EntityDataFramework.Core.Models.Engine;
 
-namespace EntityDataFramework.Core.Models.Command
+namespace EntityDataFramework.Core.Models.Command.Abstraction
 {
 	public abstract class BaseDbCommand: IDbCommand {
 		protected IDbEngine DbEngine { get; }

@@ -1,6 +1,6 @@
 ﻿using EntityDataFramework.Core.Models.Engine;
 
-namespace EntityDataFramework.Core.Models.Command
+namespace EntityDataFramework.Core.Models.Command.Abstraction
 {
 	public abstract class BaseDbExecuteExecuteNonQueryCommand: BaseDbCommand, IDbExucuteNonQueryCommand {
 		protected BaseDbExecuteExecuteNonQueryCommand(IDbEngine dbEngine) : base(dbEngine) { }
