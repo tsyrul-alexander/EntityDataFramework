@@ -26,8 +26,12 @@ namespace EntityDataFramework.Core.Models.Engine
 		protected abstract ICreateDataBaseCommand GetCreateDataBaseCommand();
 		protected abstract IExistsDataBaseCommand GetIfExistsDataBaseCommand();
 		public abstract IDbConnection CreateConnection();
-		public IDbCommand CreateDbCommand(IDbConnection connection) {
-			throw new NotImplementedException();
+		public abstract IDbCommand CreateDbCommand(IDbConnection connection);
+		protected virtual void CreateTables() {
+			EntityTables.ForEach(CreateTable);
+		}
+		protected virtual void CreateTable(IEntityTable entityTable) {
+
 		}
 	}
 }

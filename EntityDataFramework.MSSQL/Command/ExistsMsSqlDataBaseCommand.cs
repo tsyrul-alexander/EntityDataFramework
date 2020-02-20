@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using EntityDataFramework.Core.Models.Command;
 using EntityDataFramework.Core.Models.Engine;
 using EntityDataFramework.MSSQL.Utilities;
@@ -9,7 +10,7 @@ namespace EntityDataFramework.MSSQL.Command {
 		private readonly string _masterConnectionString;
 		public string DataBaseName { get; set; }
 		public bool IfExist() {
-			var value = Execute<int?>();
+			var value = Execute<short?>().FirstOrDefault();
 			return value != null;
 		}
 		public ExistsMsSqlDataBaseCommand(IDbEngine dbEngine, string masterConnectionString, string dataBaseName) : base(dbEngine) {
@@ -20,7 +21,7 @@ namespace EntityDataFramework.MSSQL.Command {
 			return new SqlConnection(_masterConnectionString);
 		}
 		protected override object Read(IDataReader dataReader) {
-			return dataReader.IsDBNull(0) ? (int?)null : dataReader.GetInt32(0);
+			return dataReader.IsDBNull(0) ? (short?)null : dataReader.GetInt16(0);
 		}
 		protected override void SetCommandParameters(IDataParameterCollection parameterCollection) {
 			base.SetCommandParameters(parameterCollection);

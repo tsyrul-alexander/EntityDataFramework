@@ -3,6 +3,7 @@ using System.Data.SqlClient;
 using EntityDataFramework.Core.Models.Command;
 using EntityDataFramework.Core.Models.Engine;
 using EntityDataFramework.MSSQL.Command;
+using IDbCommand = System.Data.IDbCommand;
 
 namespace EntityDataFramework.MSSQL.Engine {
 	public class MSSqlDbEngine : BaseDbEngine {
@@ -18,12 +19,18 @@ namespace EntityDataFramework.MSSQL.Engine {
 			return new ExistsMsSqlDataBaseCommand(this, GetMasterConnectionString(), ConnectionStringBuilder.InitialCatalog);
 		}
 		protected virtual string GetMasterConnectionString() {
-			var masterConnectionBuilder = new SqlConnectionStringBuilder(ConnectionStringBuilder.ConnectionString);
-			masterConnectionBuilder.InitialCatalog = MasterDataBaseName;
+			var masterConnectionBuilder = new SqlConnectionStringBuilder(ConnectionStringBuilder.ConnectionString) {
+				InitialCatalog = MasterDataBaseName
+			};
 			return masterConnectionBuilder.ConnectionString;
 		}
 		public override IDbConnection CreateConnection() {
 			return new SqlConnection(ConnectionStringBuilder.ConnectionString);
+		}
+		public override IDbCommand CreateDbCommand(IDbConnection connection) {
+			return new SqlCommand {
+				Connection = (SqlConnection)connection
+			};
 		}
 	}
 }

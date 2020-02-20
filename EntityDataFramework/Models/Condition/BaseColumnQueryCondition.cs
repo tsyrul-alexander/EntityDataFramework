@@ -4,8 +4,11 @@ using System.Text;
 
 namespace EntityDataFramework.Core.Models.Condition
 {
-	interface ICondition
+	class BaseColumnQueryCondition: IQueryCondition
 	{
-		string GetSqlText(string tableName);
+
+		public string GetSqlText(string tableName) {
+			return null;
+		}
 	}
 }

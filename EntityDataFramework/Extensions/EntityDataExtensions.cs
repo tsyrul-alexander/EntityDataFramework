@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using EntityDataFramework.Core.Models.Engine;
+﻿using EntityDataFramework.Core.Models.Engine;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EntityDataFramework.Core.Extensions
-{
-	public static class EntityDataExtensions
-	{
+namespace EntityDataFramework.Core.Extensions {
+	public static class EntityDataExtensions {
 		public static void UseEntityData(this IServiceCollection serviceCollection, IDbEngine dbEngine) {
 			serviceCollection.AddSingleton(provider => dbEngine);
 		}
