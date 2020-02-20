@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace EntityDataFramework.Core.Models.Command
+﻿namespace EntityDataFramework.Core.Models.Command
 {
 	public abstract class CommandManager {
 		public virtual string CreateTableCommandName => "CREATE TABLE";

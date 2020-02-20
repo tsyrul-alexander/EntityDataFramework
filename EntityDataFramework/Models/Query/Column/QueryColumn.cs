@@ -1,5 +1,7 @@
-﻿namespace EntityDataFramework.Core.Models.Query {
-	public class QueryColumn {
+﻿using EntityDataFramework.Core.Models.Query.Column;
+
+namespace EntityDataFramework.Core.Models.Query {
+	public class QueryColumn: IQueryColumn {
 		public string Name { get; set; }
 		public string TableName { get; set; }
 		public QueryColumn(string tableName = null, string name = null) {
@@ -11,6 +13,9 @@
 		}
 		public static bool operator !=(QueryColumn queryColumn1, QueryColumn queryColumn2) {
 			return !(queryColumn1 == queryColumn2);
+		}
+		public string GetSqlText() {
+			return $"{TableName}.{Name}";
 		}
 	}
 }

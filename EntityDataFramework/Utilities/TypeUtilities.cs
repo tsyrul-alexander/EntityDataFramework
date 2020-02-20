@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace EntityDataFramework.Core.Utilities {
 	public static class TypeUtilities {

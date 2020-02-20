@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Text;
-using EntityDataFramework.Core.Models.Engine;
+﻿using EntityDataFramework.Core.Models.Engine;
 
 namespace EntityDataFramework.Core.Models.Command
 {

@@ -2,6 +2,6 @@
 {
 	public interface IQueryCondition
 	{
-		string GetSqlText(string tableName);
+		string GetSqlText();
 	}
 }

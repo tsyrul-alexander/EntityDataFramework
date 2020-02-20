@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using EntityDataFramework.Core.Models.Condition;
 
-namespace EntityDataFramework.Core.Models.Query
+namespace EntityDataFramework.Core.Models.Query.Contract
 {
-	interface IQueryConditionList {
+	public interface IQueryConditionList {
 		List<IQueryCondition> Conditions { get; set; }
 	}
 }

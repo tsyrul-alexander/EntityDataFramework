@@ -10,7 +10,7 @@ namespace EntityDataFramework.Core.Models.Condition {
 			LogicalOperation = logicalOperation;
 			QueryConditions = queryConditions.ToList();
 		}
-		public string GetSqlText(string tableName) {
+		public string GetSqlText() {
 			throw new NotImplementedException();
 		}
 	}
