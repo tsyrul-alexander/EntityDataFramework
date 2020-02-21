@@ -1,3 +1,3 @@
 ﻿namespace EntityDataFramework.Core.Models.Query.Contract {
-	public interface IFiltrationQuery<T> : ISchemaQuery<T>, IQueryJoinList, IQueryConditionList { }
+	public interface IFiltrationQuery : ISchemaQuery, IQueryJoinList, IQueryConditionList { }
 }
