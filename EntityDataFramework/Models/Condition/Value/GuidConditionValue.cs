@@ -6,8 +6,5 @@ namespace EntityDataFramework.Core.Models.Condition.Value {
 		public GuidConditionValue(Guid value) {
 			Value = value;
 		}
-		public override string GetValue() {
-			return string.Empty;
-		}
 	}
 }

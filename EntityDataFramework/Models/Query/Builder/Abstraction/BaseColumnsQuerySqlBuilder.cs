@@ -6,7 +6,8 @@ using EntityDataFramework.Core.Models.Query.Contract;
 using EntityDataFramework.Core.Utilities;
 
 namespace EntityDataFramework.Core.Models.Query.Builder.Abstraction {
-	public abstract class BaseColumnQuerySqlBuilder : BaseQuerySqlBuilder, IColumnQuerySqlBuilder {
+	public abstract class BaseColumnsQuerySqlBuilder : BaseQuerySqlBuilder, IColumnsQuerySqlBuilder, IColumnQuerySqlBuilder {
+		public virtual string AllColumnSymbol => "*";
 		public virtual void SetQueryColumnsSql(ISelectionQuery selectQuery, StringBuilder stringBuilder) {
 			if (selectQuery.UseAllSchemaColumns) {
 				SetAllColumnSql(selectQuery, stringBuilder);
@@ -20,7 +21,7 @@ namespace EntityDataFramework.Core.Models.Query.Builder.Abstraction {
 				}
 			}
 		}
-		protected virtual void SetQueryColumnSql(IQueryColumn queryColumn, StringBuilder stringBuilder) {
+		public virtual void SetQueryColumnSql(IQueryColumn queryColumn, StringBuilder stringBuilder) {
 			switch (queryColumn) {
 				case QueryColumn queryColumnValue:
 					SetQueryColumnSql(queryColumnValue, stringBuilder);
@@ -67,11 +68,5 @@ namespace EntityDataFramework.Core.Models.Query.Builder.Abstraction {
 			return $"{functionName}({args.JoinStr(ColumnSeparator)})";
 		}
 		protected abstract string GetCountQueryFunctionName();
-		protected virtual string GetTableFormat(string tableName) {
-			return SetToDelimitedIdentifiers(tableName);
-		}
-		protected virtual string GetColumnFormat(string columnName) {
-			return SetToDelimitedIdentifiers(columnName);
-		}
 	}
 }

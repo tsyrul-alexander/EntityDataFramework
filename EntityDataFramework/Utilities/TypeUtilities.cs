@@ -12,9 +12,10 @@ namespace EntityDataFramework.Core.Utilities {
 		public static bool GetIsEmpty<T>(this IList<T> array) {
 			return array == null || array.Count == 0;
 		}
-		public static void ForEach<T>(this IEnumerable<T> array, Action<T> action) {
-			foreach (var item in array) {
-				action(item);
+		public static void ForEach<T>(this IList<T> array, Action<T, int> action) {
+			for (var i = 0; i < array.Count; i++) {
+				action(array[i], i);
+				
 			}
 		}
 	}

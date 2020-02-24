@@ -1,8 +1,8 @@
 ﻿using System.Text;
-using EntityDataFramework.Core.Models.Query.Contract;
+using EntityDataFramework.Core.Models.Query.Column;
 
 namespace EntityDataFramework.Core.Models.Query.Builder.Contract {
 	public interface IColumnQuerySqlBuilder {
-		void SetQueryColumnsSql(ISelectionQuery selectQuery, StringBuilder stringBuilder);
+		void SetQueryColumnSql(IQueryColumn queryColumn, StringBuilder stringBuilder);
 	}
 }

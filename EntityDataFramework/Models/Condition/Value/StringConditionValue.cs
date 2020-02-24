@@ -4,8 +4,5 @@
 		public StringConditionValue(string value) {
 			Value = value;
 		}
-		public override string GetValue() {
-			return string.Empty;
-		}
 	}
 }

@@ -5,9 +5,10 @@ using EntityDataFramework.Core.Models.Condition;
 using EntityDataFramework.Core.Models.Engine;
 using EntityDataFramework.Core.Models.Query.Column;
 using EntityDataFramework.Core.Models.Query.Contract;
+using EntityDataFramework.Core.Models.Query.Join;
 
 namespace EntityDataFramework.Core.Models.Query.Select {
-	public class SelectQuery: BaseTableOperationQuery, ISelectionQuery, IFiltrationQuery {
+	public class SelectQuery: BaseTableOperationQuery, ISelectQuery {
 		public bool UseAllSchemaColumns { get; set; }
 		public List<IQueryColumn> Columns { get; set; } = new List<IQueryColumn>();
 		public List<QueryJoin> Joins { get; set; } = new List<QueryJoin>();

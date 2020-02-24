@@ -19,7 +19,10 @@ namespace EntityDataFramework.MSSQL.Engine {
 			return masterConnectionBuilder.ConnectionString;
 		}
 		public override ISelectQuerySqlBuilder GetSelectQuerySqlBuilder() {
-			return new MsSqlSelectQuerySqlBuilder(new MsSqlColumnQuerySqlBuilder());
+			var columnsBuilder = new MsSqlColumnsQuerySqlBuilder();
+			var joinsBuilder = new MsSqlJoinsQuerySqlBuilder();
+			var conditionsBuilder = new MsSqlConditionsQueryBuilder(columnsBuilder);
+			return new MsSqlSelectQuerySqlBuilder(columnsBuilder, joinsBuilder, conditionsBuilder);
 		}
 		public override IDbConnection CreateConnection() {
 			return new SqlConnection(ConnectionStringBuilder.ConnectionString);
