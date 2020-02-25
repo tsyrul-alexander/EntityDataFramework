@@ -1,6 +1,5 @@
-﻿namespace EntityDataFramework.Core.Models.Query.Column
-{
+﻿namespace EntityDataFramework.Core.Models.Query.Column {
 	public interface IQueryColumn {
-		string GetSqlText();
+		string Alias { get; set; }
 	}
 }

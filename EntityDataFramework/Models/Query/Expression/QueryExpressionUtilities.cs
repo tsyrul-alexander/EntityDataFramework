@@ -6,9 +6,10 @@ using EntityDataFramework.Core.Models.Query.Contract;
 
 namespace EntityDataFramework.Core.Models.Query.Expression {
 	public static class QueryExpressionUtilities {
-		public static void AddColumn<T, TResult>(this ISelectionQuery<T> query, Expression<Func<T, TResult>> expression) {
+		public static void AddColumn<T, TResult>(this ISelectionQuery<T> query, Expression<Func<T, TResult>> expression, string alias = null) {
 			var builder = new ColumnQueryExpressionBuilder(query.GetColumnQueryExpressionOptions());
 			var queryColumn = builder.Parse(expression);
+			queryColumn.Alias = alias;
 			query.SetQueryColumn(queryColumn);
 		}
 		public static void AddWhere<T>(this IFiltrationQuery<T> query, Expression<Func<T, bool>> expression) {

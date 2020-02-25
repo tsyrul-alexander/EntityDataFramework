@@ -7,7 +7,7 @@ using EntityDataFramework.Core.Utilities;
 
 namespace EntityDataFramework.Core.Models.Query.Builder.Abstraction {
 	public abstract class BaseColumnsQuerySqlBuilder : BaseQuerySqlBuilder, IColumnsQuerySqlBuilder, IColumnQuerySqlBuilder {
-		public virtual string AllColumnSymbol => "*";
+		protected virtual string AllColumnSymbol => "*";
 		public virtual void SetQueryColumnsSql(ISelectionQuery selectQuery, StringBuilder stringBuilder) {
 			if (selectQuery.UseAllSchemaColumns) {
 				SetAllColumnSql(selectQuery, stringBuilder);
@@ -21,17 +21,19 @@ namespace EntityDataFramework.Core.Models.Query.Builder.Abstraction {
 				}
 			}
 		}
-		public virtual void SetQueryColumnSql(IQueryColumn queryColumn, StringBuilder stringBuilder) {
+		public virtual string GetQueryColumnSql(IQueryColumn queryColumn) {
 			switch (queryColumn) {
 				case QueryColumn queryColumnValue:
-					SetQueryColumnSql(queryColumnValue, stringBuilder);
-					break;
+					return GetQueryColumnSql(queryColumnValue);
 				case QueryFunctionColumn queryFunctionColumn:
-					SetQueryColumnSql(queryFunctionColumn, stringBuilder);
-					break;
+					return GetQueryColumnSql(queryFunctionColumn);
 				default:
 					throw new NotImplementedException(nameof(queryColumn));
 			}
+		}
+		protected virtual void SetQueryColumnSql(IQueryColumn queryColumn, StringBuilder stringBuilder) {
+			var queryColumnSql = GetQueryColumnSql(queryColumn);
+			stringBuilder.Append($"{queryColumnSql} AS {queryColumn.Alias}");
 		}
 		protected virtual void SetAllColumnSql(ISelectionQuery selectQuery, StringBuilder stringBuilder) {
 			var isEmptyColumns = selectQuery.Columns.GetIsEmpty();
@@ -40,33 +42,37 @@ namespace EntityDataFramework.Core.Models.Query.Builder.Abstraction {
 			var separateStr = isEmptyColumns ? string.Empty : ColumnSeparator;
 			stringBuilder.Append($"{tableFormat}.{AllColumnSymbol} {separateStr}");
 		}
-		protected virtual void SetQueryColumnSql(QueryColumn queryColumn, StringBuilder stringBuilder) {
+		protected virtual string GetQueryColumnSql(QueryColumn queryColumn) {
 			var tableFormat = GetTableFormat(queryColumn.TableName);
 			var columnFormat = GetColumnFormat(queryColumn.Name);
-			stringBuilder.AppendFormat("{0}.{1}", tableFormat, columnFormat);
+			return $"{tableFormat}.{columnFormat}";
 		}
-		protected virtual void SetQueryColumnSql(QueryFunctionColumn queryFunctionColumn, StringBuilder stringBuilder) {
+		protected virtual string GetQueryColumnSql(QueryFunctionColumn queryFunctionColumn) {
 			switch (queryFunctionColumn.FunctionType) {
 				case QueryFunctionType.Count:
-					SetCountQueryFunctionColumn(queryFunctionColumn, stringBuilder);
-					break;
+					return GetCountQueryFunctionColumn(queryFunctionColumn);
 				case QueryFunctionType.Sum:
-					SetSumQueryFunctionColumn(queryFunctionColumn, stringBuilder);
-					break;
+					return GetSumQueryFunctionColumn(queryFunctionColumn);
 				default:
 					throw new NotImplementedException(nameof(queryFunctionColumn.FunctionType));
 			}
 		}
-		protected virtual void SetCountQueryFunctionColumn(QueryFunctionColumn queryFunctionColumn,
-			StringBuilder stringBuilder) {
+		protected virtual string GetCountQueryFunctionColumn(QueryFunctionColumn queryFunctionColumn) {
 			var countFunctionName = GetCountQueryFunctionName();
-			stringBuilder.Append(GetFunctionCallSql(countFunctionName));
+			return GetFunctionCallSql(countFunctionName);
 		}
-		protected virtual void SetSumQueryFunctionColumn(QueryFunctionColumn queryFunctionColumn,
-			StringBuilder stringBuilder) { }
+		protected virtual string GetSumQueryFunctionColumn(QueryFunctionColumn queryFunctionColumn) {
+			var sumFunctionName = GetSumQueryFunctionName();
+			return GetFunctionCallSql(sumFunctionName);
+		}
 		protected virtual string GetFunctionCallSql(string functionName, params string[] args) {
 			return $"{functionName}({args.JoinStr(ColumnSeparator)})";
 		}
-		protected abstract string GetCountQueryFunctionName();
+		protected virtual string GetCountQueryFunctionName() {
+			return "Count";
+		}
+		protected virtual string GetSumQueryFunctionName() {
+			return "Sum";
+		}
 	}
 }

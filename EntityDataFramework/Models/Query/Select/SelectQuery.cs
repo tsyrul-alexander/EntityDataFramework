@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using EntityDataFramework.Core.Models.Command.Abstraction;
+using System.Data;
+using EntityDataFramework.Core.Models.Command;
 using EntityDataFramework.Core.Models.Condition;
 using EntityDataFramework.Core.Models.Engine;
+using EntityDataFramework.Core.Models.Query.Builder.Contract;
 using EntityDataFramework.Core.Models.Query.Column;
 using EntityDataFramework.Core.Models.Query.Contract;
 using EntityDataFramework.Core.Models.Query.Join;
+using EntityDataFramework.Core.Models.Query.Response;
 
 namespace EntityDataFramework.Core.Models.Query.Select {
 	public class SelectQuery: BaseTableOperationQuery, ISelectQuery {
@@ -14,10 +17,32 @@ namespace EntityDataFramework.Core.Models.Query.Select {
 		public List<QueryJoin> Joins { get; set; } = new List<QueryJoin>();
 		public List<IQueryCondition> Conditions { get; set; } = new List<IQueryCondition>();
 		public SelectQuery(IDbEngine dbEngine, string tableName) : base(dbEngine, tableName) { }
-		public IEnumerable<object> GetEntities() {
-			var builder = DbEngine.GetSelectQuerySqlBuilder();
-			var selectSql = builder.Build(this);
-			throw new NotImplementedException();
+		public IEnumerable<SelectQueryRowValue> GetEntities() {
+			var builder = GetSelectQuerySqlBuilder();
+			var selectSql = GetSelectQuerySqlText(builder);
+			return Execute(selectSql, ReadQueryRowValue);
+		}
+		protected virtual IEnumerable<T> Execute<T>(string selectSql, Func<IDataReader, T> readFunc) {
+			var customSqlCommand = new CustomExecuteSqlCommand(DbEngine);
+			return customSqlCommand.Execute(selectSql, readFunc);
+		}
+		protected virtual string GetSelectQuerySqlText(ISelectQuerySqlBuilder builder) {
+			return builder.Build(this);
+		}
+		protected virtual ISelectQuerySqlBuilder GetSelectQuerySqlBuilder() {
+			return DbEngine.GetSelectQuerySqlBuilder();
+		}
+		protected virtual SelectQueryRowValue ReadQueryRowValue(IDataReader dataReader) {
+			var rowValue = new SelectQueryRowValue();
+			foreach (var queryColumn in Columns) {
+				rowValue.Values.Add(ReadQueryColumnValue(dataReader, queryColumn));
+			}
+			return rowValue;
+		}
+		protected virtual SelectQueryColumnValue ReadQueryColumnValue(IDataReader dataReader, IQueryColumn queryColumn) {
+			var dataColumnName = queryColumn.Alias;
+			var dataValue = dataReader[dataColumnName];
+			return new SelectQueryColumnValue(dataColumnName, dataValue);
 		}
 	}
 }

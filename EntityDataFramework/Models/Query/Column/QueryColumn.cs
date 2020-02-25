@@ -2,8 +2,13 @@
 
 namespace EntityDataFramework.Core.Models.Query {
 	public class QueryColumn: IQueryColumn {
+		private string _alias;
 		public string Name { get; set; }
 		public string TableName { get; set; }
+		public string Alias {
+			get => _alias ?? $"{TableName}{Name}";
+			set => _alias = value;
+		}
 		public QueryColumn(string tableName = null, string name = null) {
 			Name = name;
 			TableName = tableName;
@@ -13,9 +18,6 @@ namespace EntityDataFramework.Core.Models.Query {
 		}
 		public static bool operator !=(QueryColumn queryColumn1, QueryColumn queryColumn2) {
 			return !(queryColumn1 == queryColumn2);
-		}
-		public string GetSqlText() {
-			return $"{TableName}.{Name}";
 		}
 	}
 }

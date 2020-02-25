@@ -11,8 +11,5 @@ namespace EntityDataFramework.Core.Models.Condition {
 			Value = value;
 			ComparisonType = comparisonType;
 		}
-		public string GetSqlText() {
-			return string.Empty;
-		}
 	}
 }

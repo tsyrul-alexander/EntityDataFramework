@@ -8,11 +8,16 @@ using EntityDataFramework.Core.Utilities;
 
 namespace EntityDataFramework.Core.Models.Query.Builder.Abstraction {
 	public abstract class BaseConditionsQuerySqlBuilder : BaseQuerySqlBuilder, IConditionsQuerySqlBuilder {
+		protected virtual string WhereCommandName => "WHERE";
 		public IColumnQuerySqlBuilder ColumnQuerySqlBuilder { get; }
 		public BaseConditionsQuerySqlBuilder(IColumnQuerySqlBuilder columnQuerySqlBuilder) {
 			ColumnQuerySqlBuilder = columnQuerySqlBuilder;
 		}
 		public virtual void SetQueryConditionsSql(IFiltrationQuery filtrationQuery, StringBuilder stringBuilder) {
+			if (filtrationQuery.Conditions.GetIsEmpty()) {
+				return;
+			}
+			stringBuilder.Append($"{WhereCommandName} ");
 			var filtrationGroup =
 				new GroupQueryCondition(ConditionLogicalOperation.And, filtrationQuery.Conditions.ToArray());
 			SetQueryConditionSql(filtrationGroup, stringBuilder);
@@ -22,6 +27,9 @@ namespace EntityDataFramework.Core.Models.Query.Builder.Abstraction {
 				case ColumnValueQueryCondition columnValueQueryCondition: 
 					SetColumnValueQueryCondition(columnValueQueryCondition, stringBuilder);
 					break;
+				case ColumnsQueryCondition columnsQueryCondition:
+					SetColumnsQueryCondition(columnsQueryCondition, stringBuilder);
+					break;
 				case GroupQueryCondition groupQueryCondition:
 					SetGroupQueryCondition(groupQueryCondition, stringBuilder);
 					break;
@@ -30,10 +38,15 @@ namespace EntityDataFramework.Core.Models.Query.Builder.Abstraction {
 
 			}
 		}
+		protected virtual void SetColumnsQueryCondition(ColumnsQueryCondition condition, StringBuilder stringBuilder) {
+			var column1Sql = ColumnQuerySqlBuilder.GetQueryColumnSql(condition.QueryColumn1);
+			var column2Sql = ColumnQuerySqlBuilder.GetQueryColumnSql(condition.QueryColumn2);
+			stringBuilder.Append(GetComparisonTypeSql(condition.ComparisonType, column1Sql, column2Sql));
+		}
 		protected virtual void SetColumnValueQueryCondition(ColumnValueQueryCondition condition, StringBuilder stringBuilder) {
-			ColumnQuerySqlBuilder.SetQueryColumnSql(condition.Column, stringBuilder);
-			stringBuilder.Append(" ");
-			stringBuilder.Append(GetConditionValueSql(condition.Value, condition.ComparisonType));
+			var columnSql = ColumnQuerySqlBuilder.GetQueryColumnSql(condition.Column);
+			var valueSql = GetConditionValueSql(condition.Value);
+			stringBuilder.Append(GetComparisonTypeSql(condition.ComparisonType, columnSql, valueSql));
 		}
 		protected virtual void SetGroupQueryCondition(GroupQueryCondition condition, StringBuilder stringBuilder) {
 			var logicalOperatorSql = $" {GetConditionLogicalOperationSql(condition.LogicalOperation)} ";
@@ -47,72 +60,47 @@ namespace EntityDataFramework.Core.Models.Query.Builder.Abstraction {
 			});
 			stringBuilder.Append(")");
 		}
-		protected virtual string GetComparisonTypeSql(ConditionComparisonType comparisonType) {
+		protected virtual string GetComparisonTypeSql(ConditionComparisonType comparisonType, string leftExpression, string rightExpression) {
 			switch (comparisonType) {
 				case ConditionComparisonType.Equal:
-					return GetEqualComparisonTypeSql();
+					return GetEqualComparisonTypeSql(leftExpression, rightExpression);
 				case ConditionComparisonType.NotEqual:
-					return GetNotEqualComparisonTypeSql();
+					return GetNotEqualComparisonTypeSql(leftExpression, rightExpression);
 				case ConditionComparisonType.Contains:
-					return GetContainsComparisonTypeSql();
+					return GetContainsComparisonTypeSql(leftExpression, rightExpression);
 				default:
 					throw new NotImplementedException(nameof(comparisonType));
 			}
 		}
-		protected virtual string GetEqualComparisonTypeSql() {
-			return "=";
+		protected virtual string GetEqualComparisonTypeSql(string leftExpression, string rightExpression) {
+			return $"{leftExpression} = {rightExpression}";
 		}
-		protected virtual string GetNotEqualComparisonTypeSql() {
-			return "!=";
+		protected virtual string GetNotEqualComparisonTypeSql(string leftExpression, string rightExpression) {
+			return $"{leftExpression} != {rightExpression}";
 		}
-		protected virtual string GetContainsComparisonTypeSql() {
-			return "LIKE";
+		protected virtual string GetContainsComparisonTypeSql(string leftExpression, string rightExpression) {
+			return $"{leftExpression} LIKE '%{rightExpression}%'";
 		}
-		protected virtual string GetConditionValueSql(IConditionValue conditionValue, ConditionComparisonType comparisonType) {
+		protected virtual string GetConditionValueSql(IConditionValue conditionValue) {
 			switch (conditionValue) {
 				case GuidConditionValue guidConditionValue:
-					return GetGuidConditionValueSql(guidConditionValue, comparisonType);
+					return GetGuidConditionValueSql(guidConditionValue);
 				case StringConditionValue stringConditionValue:
-					return GetStringConditionValueSql(stringConditionValue, comparisonType);
+					return GetStringConditionValueSql(stringConditionValue);
 				case NullConditionValue nullConditionValue:
-					return GetNullConditionValueSql(nullConditionValue, comparisonType);
+					return GetNullConditionValueSql(nullConditionValue);
 				default:
 					throw new NotImplementedException(nameof(conditionValue));
 			}
 		}
-		protected virtual string GetNullConditionValueSql(NullConditionValue nullConditionValue, ConditionComparisonType comparisonType) {
-			switch (comparisonType) {
-				case ConditionComparisonType.Equal:
-					return "IS NULL";
-				case ConditionComparisonType.NotEqual:
-					return "IS NOT NULL";
-				default:
-					throw new NotImplementedException(nameof(comparisonType));
-			}
+		protected virtual string GetNullConditionValueSql(NullConditionValue nullConditionValue) {
+			return "NULL";
 		}
-		protected virtual string GetStringConditionValueSql(StringConditionValue stringConditionValue, ConditionComparisonType comparisonType) {
-			var conditionTypeSql = GetComparisonTypeSql(comparisonType);
-			var value = stringConditionValue.Value;
-			switch (comparisonType) {
-				case ConditionComparisonType.Equal:
-				case ConditionComparisonType.NotEqual:
-					return $"{conditionTypeSql} '{value}'";
-				case ConditionComparisonType.Contains:
-					return $"{conditionTypeSql} '%{value}%'";
-				default:
-					throw new NotImplementedException(nameof(comparisonType));
-			}
+		protected virtual string GetStringConditionValueSql(StringConditionValue stringConditionValue) {
+			return $"'{stringConditionValue.Value}'";
 		}
-		protected virtual string GetGuidConditionValueSql(GuidConditionValue guidConditionValue, ConditionComparisonType comparisonType) {
-			var conditionTypeSql = GetComparisonTypeSql(comparisonType);
-			var value = guidConditionValue.Value.ToString("B");
-			switch (comparisonType) {
-				case ConditionComparisonType.Equal:
-				case ConditionComparisonType.NotEqual:
-					return $"{conditionTypeSql} '{value}'";
-				default:
-					throw new NotImplementedException(nameof(comparisonType));
-			}
+		protected virtual string GetGuidConditionValueSql(GuidConditionValue guidConditionValue) {
+			return guidConditionValue.Value.ToString("B");
 		}
 		protected virtual string GetConditionLogicalOperationSql(ConditionLogicalOperation logicalOperation) {
 			switch (logicalOperation) {

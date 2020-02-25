@@ -28,7 +28,7 @@ namespace EntityDataFramework.Core.Models.Query.Expression {
 		}
 		protected virtual IQueryCondition ParseBlock(BlockExpression expression) {
 			return new GroupQueryCondition(ConditionLogicalOperation.And,
-				expression.Expressions.Select(exp => Parse(exp)).ToArray());
+				expression.Expressions.Select(Parse).ToArray());
 		}
 		protected virtual IQueryCondition ParseBinary(BinaryExpression expression) {
 			switch (expression.NodeType) {
@@ -38,6 +38,8 @@ namespace EntityDataFramework.Core.Models.Query.Expression {
 					return ParseNotEqualBinaryOperation(expression);
 				case ExpressionType.AndAlso:
 					return ParseAndAlsoBinaryOperation(expression);
+				case ExpressionType.OrElse:
+					return ParseOrElseBinaryOperation(expression);
 				default:
 					throw new NotImplementedException(nameof(expression.NodeType));
 			}
@@ -50,17 +52,28 @@ namespace EntityDataFramework.Core.Models.Query.Expression {
 			return condition;
 		}
 
+		protected virtual IQueryCondition ParseOrElseBinaryOperation(BinaryExpression expression) {
+			var condition = new GroupQueryCondition(ConditionLogicalOperation.Or);
+			condition.QueryConditions.Add(Parse(expression.Left));
+			condition.QueryConditions.Add(Parse(expression.Right));
+			return condition;
+		}
+
 		protected virtual IQueryCondition ParseComparisonTypeBinaryOperation(BinaryExpression expression,
 			ConditionComparisonType comparisonType) {
 			var leftExp = expression.Left;
 			var rightExp = expression.Right;
 			if (leftExp.NodeType == ExpressionType.MemberAccess && rightExp.NodeType == ExpressionType.Constant) {
-				return CreateColumnCondition(GetParseMemberColumn((MemberExpression) leftExp, Options),
+				return CreateColumnValueCondition(GetParseMemberColumn((MemberExpression) leftExp, Options),
 					ParseConstant((ConstantExpression) rightExp), comparisonType);
 			}
-			if (rightExp.NodeType == ExpressionType.MemberAccess && rightExp.NodeType == ExpressionType.Constant) {
-				return CreateColumnCondition(GetParseMemberColumn((MemberExpression) rightExp, Options),
+			if (rightExp.NodeType == ExpressionType.MemberAccess && leftExp.NodeType == ExpressionType.Constant) {
+				return CreateColumnValueCondition(GetParseMemberColumn((MemberExpression) rightExp, Options),
 					ParseConstant((ConstantExpression) leftExp), comparisonType);
+			}
+			if (rightExp.NodeType == ExpressionType.MemberAccess && leftExp.NodeType == ExpressionType.MemberAccess) {
+				return CreateColumnsCondition(GetParseMemberColumn((MemberExpression) rightExp, Options),
+					GetParseMemberColumn((MemberExpression) leftExp, Options), comparisonType);
 			}
 			throw new NotImplementedException(nameof(leftExp.NodeType));
 		}
@@ -83,9 +96,13 @@ namespace EntityDataFramework.Core.Models.Query.Expression {
 		protected virtual IQueryCondition ParseNotEqualBinaryOperation(BinaryExpression expression) {
 			return ParseComparisonTypeBinaryOperation(expression, ConditionComparisonType.NotEqual);
 		}
-		protected virtual IQueryCondition CreateColumnCondition(IQueryColumn queryColumn,
+		protected virtual IQueryCondition CreateColumnValueCondition(IQueryColumn queryColumn,
 			IConditionValue conditionValue, ConditionComparisonType comparisonType) {
 			return new ColumnValueQueryCondition(queryColumn, conditionValue, comparisonType);
+		}
+		protected virtual IQueryCondition CreateColumnsCondition(IQueryColumn queryColumn1,
+			IQueryColumn queryColumn2, ConditionComparisonType comparisonType) {
+			return new ColumnsQueryCondition(queryColumn1, queryColumn2, comparisonType);
 		}
 	}
 }
