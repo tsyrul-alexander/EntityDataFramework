@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Linq.Expressions;
 using EntityDataFramework.Core.Models.Query.Column;
+using EntityDataFramework.Core.Models.Query.Expression.Contract;
 
 namespace EntityDataFramework.Core.Models.Query.Expression {
-	public class ColumnQueryExpressionBuilder : BaseQueryExpressionBuilder {
+	public class ColumnQueryExpressionBuilder : BaseQueryExpressionBuilder, IColumnQueryExpressionBuilder {
 		public ColumnQueryExpressionOptions Options { get; }
 		public ColumnQueryExpressionBuilder(ColumnQueryExpressionOptions options) {
 			Options = options ?? new ColumnQueryExpressionOptions();

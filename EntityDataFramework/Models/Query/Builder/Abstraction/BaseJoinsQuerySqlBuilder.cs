@@ -6,19 +6,20 @@ using EntityDataFramework.Core.Models.Query.Join;
 
 namespace EntityDataFramework.Core.Models.Query.Builder.Abstraction {
 	public abstract class BaseJoinsQuerySqlBuilder : BaseQuerySqlBuilder, IJoinsQuerySqlBuilder {
+		public IConditionQuerySqlBuilder ConditionQuerySqlBuilder { get; }
 		public virtual string OnCommandName => "ON";
+		public BaseJoinsQuerySqlBuilder(IConditionQuerySqlBuilder conditionQuerySqlBuilder) {
+			ConditionQuerySqlBuilder = conditionQuerySqlBuilder;
+		}
 		public virtual void SetQueryJoinsSql(IQueryJoinList queryJoinList, StringBuilder stringBuilder) {
 			queryJoinList.Joins.ForEach(join => SetQueryJoinSql(join, stringBuilder));
 		}
 		protected virtual void SetQueryJoinSql(QueryJoin queryJoin, StringBuilder stringBuilder) {
 			var joinTable = GetTableFormat(queryJoin.JoinTableName);
-			var joinTableColumn = GetColumnFormat(queryJoin.JoinTableColumnName);
-			var mainTable = GetTableFormat(queryJoin.MainTableName);
-			var mainTableColumn = GetColumnFormat(queryJoin.MainTableColumnName);
 			var joinTableAlias = GetAliasFormat(queryJoin.Alias);
 			var joinTypeSql = GetJoinTypeSql(queryJoin.Type);
 			stringBuilder.AppendLine($"{joinTypeSql} {joinTable} {AsCommandName} {joinTableAlias} " + 
-				$"{OnCommandName} {joinTableAlias}.{joinTableColumn} = {mainTable}.{mainTableColumn}");
+				$"{OnCommandName} {ConditionQuerySqlBuilder.GetQueryConditionSql(queryJoin.Condition)}");
 		}
 		protected virtual string GetJoinTypeSql(QueryJoinType type) {
 			switch (type) {

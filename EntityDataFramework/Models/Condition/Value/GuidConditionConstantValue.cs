@@ -1,9 +1,9 @@
 ﻿using System;
 
 namespace EntityDataFramework.Core.Models.Condition.Value {
-	public class GuidConditionValue : BaseConditionValue {
+	public class GuidConditionConstantValue : BaseConditionConstantValue {
 		public Guid Value { get; }
-		public GuidConditionValue(Guid value) {
+		public GuidConditionConstantValue(Guid value) {
 			Value = value;
 		}
 	}

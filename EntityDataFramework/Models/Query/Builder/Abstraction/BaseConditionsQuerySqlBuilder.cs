@@ -7,7 +7,7 @@ using EntityDataFramework.Core.Models.Query.Contract;
 using EntityDataFramework.Core.Utilities;
 
 namespace EntityDataFramework.Core.Models.Query.Builder.Abstraction {
-	public abstract class BaseConditionsQuerySqlBuilder : BaseQuerySqlBuilder, IConditionsQuerySqlBuilder {
+	public abstract class BaseConditionsQuerySqlBuilder : BaseQuerySqlBuilder, IConditionsQuerySqlBuilder, IConditionQuerySqlBuilder {
 		protected virtual string WhereCommandName => "WHERE";
 		public IColumnQuerySqlBuilder ColumnQuerySqlBuilder { get; }
 		public BaseConditionsQuerySqlBuilder(IColumnQuerySqlBuilder columnQuerySqlBuilder) {
@@ -23,44 +23,51 @@ namespace EntityDataFramework.Core.Models.Query.Builder.Abstraction {
 			SetQueryConditionSql(filtrationGroup, stringBuilder);
 		}
 		protected virtual void SetQueryConditionSql(IQueryCondition queryCondition, StringBuilder stringBuilder) {
+			var conditionSql = GetQueryConditionSql(queryCondition);
+			stringBuilder.Append(conditionSql);
+		}
+		public virtual string GetQueryConditionSql(IQueryCondition queryCondition) {
 			switch (queryCondition) {
-				case ColumnValueQueryCondition columnValueQueryCondition: 
-					SetColumnValueQueryCondition(columnValueQueryCondition, stringBuilder);
-					break;
-				case ColumnsQueryCondition columnsQueryCondition:
-					SetColumnsQueryCondition(columnsQueryCondition, stringBuilder);
-					break;
+				case BinaryQueryCondition binaryQueryCondition:
+					return GetBinaryQueryCondition(binaryQueryCondition);
+				case ColumnQueryCondition columnQueryCondition:
+					return GetColumnQueryCondition(columnQueryCondition);
 				case GroupQueryCondition groupQueryCondition:
-					SetGroupQueryCondition(groupQueryCondition, stringBuilder);
-					break;
+					return GetGroupQueryCondition(groupQueryCondition);
+				case ConstantQueryCondition constantQueryCondition:
+					return GetConstantQueryCondition(constantQueryCondition);
 				default:
 					throw new NotImplementedException(nameof(queryCondition));
 
 			}
 		}
-		protected virtual void SetColumnsQueryCondition(ColumnsQueryCondition condition, StringBuilder stringBuilder) {
-			var column1Sql = ColumnQuerySqlBuilder.GetQueryColumnSql(condition.QueryColumn1);
-			var column2Sql = ColumnQuerySqlBuilder.GetQueryColumnSql(condition.QueryColumn2);
-			stringBuilder.Append(GetComparisonTypeSql(condition.ComparisonType, column1Sql, column2Sql));
+		protected virtual string GetConstantQueryCondition(ConstantQueryCondition condition) {
+			return GetConditionValueSql(condition.ConstantValue);
 		}
-		protected virtual void SetColumnValueQueryCondition(ColumnValueQueryCondition condition, StringBuilder stringBuilder) {
-			var columnSql = ColumnQuerySqlBuilder.GetQueryColumnSql(condition.Column);
-			var valueSql = GetConditionValueSql(condition.Value);
-			stringBuilder.Append(GetComparisonTypeSql(condition.ComparisonType, columnSql, valueSql));
+		protected virtual string GetBinaryQueryCondition(BinaryQueryCondition condition) {
+			var leftConditionSql = GetQueryConditionSql(condition.LeftCondition);
+			var rightConditionSql = GetQueryConditionSql(condition.RightCondition);
+			return GetComparisonTypeSql(condition.ComparisonType, leftConditionSql, rightConditionSql);
 		}
-		protected virtual void SetGroupQueryCondition(GroupQueryCondition condition, StringBuilder stringBuilder) {
+		protected virtual string GetColumnQueryCondition(ColumnQueryCondition condition) {
+			return ColumnQuerySqlBuilder.GetQueryColumnSql(condition.QueryColumn);
+		}
+		protected virtual string GetGroupQueryCondition(GroupQueryCondition condition) {
 			var logicalOperatorSql = $" {GetConditionLogicalOperationSql(condition.LogicalOperation)} ";
-			stringBuilder.Append("(");
+			var str = string.Empty;
+			str += "(";
 			var conditions = condition.QueryConditions;
 			conditions.ForEach((queryCondition, index) => {
-				SetQueryConditionSql(queryCondition, stringBuilder);
+				str += GetQueryConditionSql(queryCondition);
 				if (!conditions.GetIsLast(index)) {
-					stringBuilder.Append(logicalOperatorSql);
+					str += logicalOperatorSql;
 				}
 			});
-			stringBuilder.Append(")");
+			str +=")";
+			return str;
 		}
-		protected virtual string GetComparisonTypeSql(ConditionComparisonType comparisonType, string leftExpression, string rightExpression) {
+		protected virtual string GetComparisonTypeSql(ConditionComparisonType comparisonType,
+				string leftExpression, string rightExpression) {
 			switch (comparisonType) {
 				case ConditionComparisonType.Equal:
 					return GetEqualComparisonTypeSql(leftExpression, rightExpression);
@@ -81,26 +88,26 @@ namespace EntityDataFramework.Core.Models.Query.Builder.Abstraction {
 		protected virtual string GetContainsComparisonTypeSql(string leftExpression, string rightExpression) {
 			return $"{leftExpression} LIKE '%{rightExpression}%'";
 		}
-		protected virtual string GetConditionValueSql(IConditionValue conditionValue) {
-			switch (conditionValue) {
-				case GuidConditionValue guidConditionValue:
+		protected virtual string GetConditionValueSql(IConditionConstantValue conditionConstantValue) {
+			switch (conditionConstantValue) {
+				case GuidConditionConstantValue guidConditionValue:
 					return GetGuidConditionValueSql(guidConditionValue);
-				case StringConditionValue stringConditionValue:
+				case StringConditionConstantValue stringConditionValue:
 					return GetStringConditionValueSql(stringConditionValue);
-				case NullConditionValue nullConditionValue:
+				case NullConditionConstantValue nullConditionValue:
 					return GetNullConditionValueSql(nullConditionValue);
 				default:
-					throw new NotImplementedException(nameof(conditionValue));
+					throw new NotImplementedException(nameof(conditionConstantValue));
 			}
 		}
-		protected virtual string GetNullConditionValueSql(NullConditionValue nullConditionValue) {
+		protected virtual string GetNullConditionValueSql(NullConditionConstantValue nullConditionConstantValue) {
 			return "NULL";
 		}
-		protected virtual string GetStringConditionValueSql(StringConditionValue stringConditionValue) {
-			return $"'{stringConditionValue.Value}'";
+		protected virtual string GetStringConditionValueSql(StringConditionConstantValue stringConditionConstantValue) {
+			return $"'{stringConditionConstantValue.Value}'";
 		}
-		protected virtual string GetGuidConditionValueSql(GuidConditionValue guidConditionValue) {
-			return guidConditionValue.Value.ToString("B");
+		protected virtual string GetGuidConditionValueSql(GuidConditionConstantValue guidConditionConstantValue) {
+			return $"'{guidConditionConstantValue.Value:B}'";
 		}
 		protected virtual string GetConditionLogicalOperationSql(ConditionLogicalOperation logicalOperation) {
 			switch (logicalOperation) {

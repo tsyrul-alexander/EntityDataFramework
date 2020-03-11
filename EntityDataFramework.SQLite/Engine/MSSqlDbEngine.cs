@@ -13,8 +13,8 @@ namespace EntityDataFramework.SQLite.Engine {
 		}
 		public override ISelectQuerySqlBuilder GetSelectQuerySqlBuilder() {
 			var columnsBuilder = new SQLiteColumnsQuerySqlBuilder();
-			var joinsBuilder = new SQLiteJoinsQuerySqlBuilder();
 			var conditionsBuilder = new SQLiteConditionsQueryBuilder(columnsBuilder);
+			var joinsBuilder = new SQLiteJoinsQuerySqlBuilder(conditionsBuilder);
 			return new SQLiteSelectQuerySqlBuilder(columnsBuilder, joinsBuilder, conditionsBuilder);
 		}
 		public override IDbConnection CreateConnection() {

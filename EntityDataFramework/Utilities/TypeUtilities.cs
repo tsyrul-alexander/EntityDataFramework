@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 
 namespace EntityDataFramework.Core.Utilities {
 	public static class TypeUtilities {
@@ -17,6 +19,15 @@ namespace EntityDataFramework.Core.Utilities {
 				action(array[i], i);
 				
 			}
+		}
+		public static bool TryGetStaticValue(this MemberInfo info, out object value) {
+			if (info is PropertyInfo propertyInfo) {
+				//propertyInfo.
+			} else if (info is FieldInfo fieldInfo) {
+
+			}
+			value = null;
+			return false;
 		}
 	}
 }

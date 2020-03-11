@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using EntityDataFramework.Core.Models.Condition;
 using EntityDataFramework.Core.Models.Condition.Value;
-using EntityDataFramework.Core.Models.Query.Column;
+using EntityDataFramework.Core.Models.Query.Expression.Contract;
 
 namespace EntityDataFramework.Core.Models.Query.Expression {
-	public class ConditionQueryExpressionBuilder : BaseQueryExpressionBuilder {
+	public class ConditionQueryExpressionBuilder : BaseQueryExpressionBuilder, IConditionQueryExpressionBuilder {
 		private ConditionQueryExpressionOptions Options { get; set; }
 		public ConditionQueryExpressionBuilder(ConditionQueryExpressionOptions options) {
 			Options = options ?? new ConditionQueryExpressionOptions();
@@ -19,9 +20,26 @@ namespace EntityDataFramework.Core.Models.Query.Expression {
 					return ParseBlock(blockExpression);
 				case BinaryExpression binaryExpression:
 					return ParseBinary(binaryExpression);
+				case MemberExpression memberExpression when memberExpression.Member is FieldInfo fieldInfo && fieldInfo.IsStatic:
+					return ParseStatic(memberExpression);
+				case MemberExpression memberAccess:
+					return ParseMember(memberAccess);
+				case ConstantExpression constantExpression:
+					return ParseConstant(constantExpression);
 				default:
 					throw new NotImplementedException(nameof(expression));
 			}
+		}
+		private IQueryCondition ParseStatic(MemberExpression memberExpression) {
+			var field = (FieldInfo)memberExpression.Member;
+			var constantValue = field.GetValue(null);
+			return CreateConstValue(constantValue);
+		}
+		protected virtual IQueryCondition ParseMember(MemberExpression memberAccess) {
+			return new ColumnQueryCondition(GetParseMemberColumn(memberAccess, Options));
+		}
+		protected virtual IQueryCondition ParseConstant(ConstantExpression constantExpression) {
+			return CreateConstValue(constantExpression.Value);
 		}
 		protected virtual IQueryCondition ParseLambda(LambdaExpression expression) {
 			return Parse(expression.Body);
@@ -60,34 +78,28 @@ namespace EntityDataFramework.Core.Models.Query.Expression {
 		}
 
 		protected virtual IQueryCondition ParseComparisonTypeBinaryOperation(BinaryExpression expression,
-			ConditionComparisonType comparisonType) {
+				ConditionComparisonType comparisonType) {
 			var leftExp = expression.Left;
 			var rightExp = expression.Right;
-			if (leftExp.NodeType == ExpressionType.MemberAccess && rightExp.NodeType == ExpressionType.Constant) {
-				return CreateColumnValueCondition(GetParseMemberColumn((MemberExpression) leftExp, Options),
-					ParseConstant((ConstantExpression) rightExp), comparisonType);
-			}
-			if (rightExp.NodeType == ExpressionType.MemberAccess && leftExp.NodeType == ExpressionType.Constant) {
-				return CreateColumnValueCondition(GetParseMemberColumn((MemberExpression) rightExp, Options),
-					ParseConstant((ConstantExpression) leftExp), comparisonType);
-			}
-			if (rightExp.NodeType == ExpressionType.MemberAccess && leftExp.NodeType == ExpressionType.MemberAccess) {
-				return CreateColumnsCondition(GetParseMemberColumn((MemberExpression) rightExp, Options),
-					GetParseMemberColumn((MemberExpression) leftExp, Options), comparisonType);
-			}
-			throw new NotImplementedException(nameof(leftExp.NodeType));
+			return new BinaryQueryCondition(Parse(leftExp), Parse(rightExp), comparisonType);
 		}
-		protected virtual IConditionValue ParseConstant(ConstantExpression constantExpression) {
-			if (constantExpression.Value is Guid guidValue) {
-				return new GuidConditionValue(guidValue);
+		protected virtual IQueryCondition CreateConstValue(object value) {
+			return new ConstantQueryCondition(GetConstantValue(value));
+		}
+		protected virtual IConditionConstantValue ParseConstantValue(ConstantExpression constantExpression) {
+			return GetConstantValue(constantExpression.Value);
+		}
+		protected virtual IConditionConstantValue GetConstantValue(object value) {
+			switch (value) {
+				case Guid guidValue:
+					return new GuidConditionConstantValue(guidValue);
+				case string stringValue:
+					return new StringConditionConstantValue(stringValue);
+				case null:
+					return new NullConditionConstantValue();
+				default:
+					throw new NotImplementedException(nameof(value));
 			}
-			if (constantExpression.Value is string stringValue) {
-				return new StringConditionValue(stringValue);
-			}
-			if (constantExpression.Value == null) {
-				return new NullConditionValue();
-			}
-			throw new NotImplementedException(nameof(constantExpression.Value));
 		}
 		protected virtual IQueryCondition ParseEqualBinaryOperation(BinaryExpression expression) {
 			return ParseComparisonTypeBinaryOperation(expression, ConditionComparisonType.Equal);
@@ -95,14 +107,6 @@ namespace EntityDataFramework.Core.Models.Query.Expression {
 
 		protected virtual IQueryCondition ParseNotEqualBinaryOperation(BinaryExpression expression) {
 			return ParseComparisonTypeBinaryOperation(expression, ConditionComparisonType.NotEqual);
-		}
-		protected virtual IQueryCondition CreateColumnValueCondition(IQueryColumn queryColumn,
-			IConditionValue conditionValue, ConditionComparisonType comparisonType) {
-			return new ColumnValueQueryCondition(queryColumn, conditionValue, comparisonType);
-		}
-		protected virtual IQueryCondition CreateColumnsCondition(IQueryColumn queryColumn1,
-			IQueryColumn queryColumn2, ConditionComparisonType comparisonType) {
-			return new ColumnsQueryCondition(queryColumn1, queryColumn2, comparisonType);
 		}
 	}
 }

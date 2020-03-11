@@ -33,7 +33,7 @@ namespace EntityDataFramework.Core.Models.Query.Builder.Abstraction {
 		}
 		protected virtual void SetQueryColumnSql(IQueryColumn queryColumn, StringBuilder stringBuilder) {
 			var queryColumnSql = GetQueryColumnSql(queryColumn);
-			stringBuilder.Append($"{queryColumnSql} AS {queryColumn.Alias}");
+			SetAliasSql(queryColumnSql, queryColumn.Alias, stringBuilder);
 		}
 		protected virtual void SetAllColumnSql(ISelectionQuery selectQuery, StringBuilder stringBuilder) {
 			var isEmptyColumns = selectQuery.Columns.GetIsEmpty();
@@ -48,22 +48,41 @@ namespace EntityDataFramework.Core.Models.Query.Builder.Abstraction {
 			return $"{tableFormat}.{columnFormat}";
 		}
 		protected virtual string GetQueryColumnSql(QueryFunctionColumn queryFunctionColumn) {
-			switch (queryFunctionColumn.FunctionType) {
-				case QueryFunctionType.Count:
-					return GetCountQueryFunctionColumn(queryFunctionColumn);
-				case QueryFunctionType.Sum:
-					return GetSumQueryFunctionColumn(queryFunctionColumn);
+			switch (queryFunctionColumn) {
+				case QueryAggregationFunctionColumn aggregationFunctionColumn:
+					return GetQueryColumnSql(aggregationFunctionColumn);
 				default:
-					throw new NotImplementedException(nameof(queryFunctionColumn.FunctionType));
+					throw new NotImplementedException(nameof(queryFunctionColumn));
 			}
 		}
-		protected virtual string GetCountQueryFunctionColumn(QueryFunctionColumn queryFunctionColumn) {
-			var countFunctionName = GetCountQueryFunctionName();
-			return GetFunctionCallSql(countFunctionName);
+		protected virtual string GetQueryColumnSql(QueryAggregationFunctionColumn queryFunctionColumn) {
+			switch (queryFunctionColumn.AggregationType) {
+				case QueryAggregationFunctionType.Count:
+					return GetCountQueryFunctionColumn(queryFunctionColumn);
+				case QueryAggregationFunctionType.Sum:
+					return GetSumQueryFunctionColumn(queryFunctionColumn);
+				default:
+					throw new NotImplementedException(nameof(queryFunctionColumn.AggregationType));
+			}
 		}
-		protected virtual string GetSumQueryFunctionColumn(QueryFunctionColumn queryFunctionColumn) {
+		protected virtual string GetCountQueryFunctionColumn(QueryAggregationFunctionColumn queryFunctionColumn) {
+			var countFunctionName = GetCountQueryFunctionName();
+			return GetAggregatedFunctionSql(countFunctionName, queryFunctionColumn.QueryColumn,
+				queryFunctionColumn.Alias);
+		}
+		protected virtual string GetSumQueryFunctionColumn(QueryAggregationFunctionColumn queryFunctionColumn) {
 			var sumFunctionName = GetSumQueryFunctionName();
-			return GetFunctionCallSql(sumFunctionName);
+			return GetAggregatedFunctionSql(sumFunctionName, queryFunctionColumn.QueryColumn,
+				queryFunctionColumn.Alias);
+		}
+		protected virtual string GetAggregatedFunctionSql(string functionName, IQueryColumn queryColumn, string alias) {
+			return GetFunctionCallSql(functionName, GetQueryColumnSql(queryColumn));
+		}
+		protected virtual string GetAliasSql(string value, string alias) {
+			return $"{value} AS {alias}";
+		}
+		protected virtual void SetAliasSql(string value, string alias, StringBuilder stringBuilder) {
+			stringBuilder.Append(GetAliasSql(value, alias));
 		}
 		protected virtual string GetFunctionCallSql(string functionName, params string[] args) {
 			return $"{functionName}({args.JoinStr(ColumnSeparator)})";
