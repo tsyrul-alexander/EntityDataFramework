@@ -5,11 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Data.SQLite" Version="1.0.112" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="3.1.6" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EntityDataFramework\EntityDataFramework.Core.csproj" />
+    <ProjectReference Include="..\EntityDataFramework.Core\EntityDataFramework.Core.csproj" />
   </ItemGroup>
 
 </Project>

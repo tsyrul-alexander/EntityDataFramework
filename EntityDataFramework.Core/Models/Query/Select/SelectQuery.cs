@@ -35,14 +35,15 @@ namespace EntityDataFramework.Core.Models.Query.Select {
 		protected virtual SelectQueryRowValue ReadQueryRowValue(IDataReader dataReader) {
 			var rowValue = new SelectQueryRowValue();
 			foreach (var queryColumn in Columns) {
-				rowValue.Values.Add(ReadQueryColumnValue(dataReader, queryColumn));
+				var (columnName, columnValue) = ReadQueryColumnValue(dataReader, queryColumn);
+				rowValue.Values.Add(columnName, columnValue);
 			}
 			return rowValue;
 		}
-		protected virtual SelectQueryColumnValue ReadQueryColumnValue(IDataReader dataReader, IQueryColumn queryColumn) {
+		protected virtual (string columnName, object columnValue) ReadQueryColumnValue(IDataReader dataReader, IQueryColumn queryColumn) {
 			var dataColumnName = queryColumn.Alias;
 			var dataValue = dataReader[dataColumnName];
-			return new SelectQueryColumnValue(dataColumnName, dataValue);
+			return(dataColumnName, dataValue);
 		}
 	}
 }

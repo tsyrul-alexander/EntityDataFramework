@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityDataFramework.Core", "EntityDataFramework\EntityDataFramework.Core.csproj", "{D5655C51-4FD1-40C6-AB53-383B6D2316C7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityDataFramework.Core", "EntityDataFramework.Core\EntityDataFramework.Core.csproj", "{D5655C51-4FD1-40C6-AB53-383B6D2316C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityDataFramework.MSSQL", "EntityDataFramework.MSSQL\EntityDataFramework.MSSQL.csproj", "{95EDF227-EF4C-4298-A7DF-91A9D5BA053D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityDataFramework.MSSQL", "EntityDataFramework.MSSQL\EntityDataFramework.MSSQL.csproj", "{95EDF227-EF4C-4298-A7DF-91A9D5BA053D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityDataFramework.SQLite", "EntityDataFramework.SQLite\EntityDataFramework.SQLite.csproj", "{00B397B8-83CF-42DA-9ECB-FD2866CC40F2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{95EDF227-EF4C-4298-A7DF-91A9D5BA053D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{95EDF227-EF4C-4298-A7DF-91A9D5BA053D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{95EDF227-EF4C-4298-A7DF-91A9D5BA053D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00B397B8-83CF-42DA-9ECB-FD2866CC40F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00B397B8-83CF-42DA-9ECB-FD2866CC40F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00B397B8-83CF-42DA-9ECB-FD2866CC40F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00B397B8-83CF-42DA-9ECB-FD2866CC40F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

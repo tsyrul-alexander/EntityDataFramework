@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EntityDataFramework\EntityDataFramework.Core.csproj" />
+    <ProjectReference Include="..\EntityDataFramework.Core\EntityDataFramework.Core.csproj" />
   </ItemGroup>
 
 </Project>
