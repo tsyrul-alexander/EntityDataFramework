@@ -23,7 +23,6 @@ select.AddColumn(contact => contact.ContactType.Name);
 select.AddColumn(contact => contact.ContactType.Name, "TypeName");
 select.AddWhere(contact => contact.ContactType.Name == "Type1" || contact.Name == "Contact1");
 var entities = select.GetEntities();
-var json = JsonConvert.SerializeObject(entities);
 var sqlText = select.GetSelectQuerySqlText(engine.GetSelectQuerySqlBuilder());
 ```
 entities:
