@@ -22,12 +22,12 @@ namespace EntityDataFramework.Core.Models.Query.Select {
 			var selectSql = GetSelectQuerySqlText(builder);
 			return Execute(selectSql, ReadQueryRowValue);
 		}
+		public virtual string GetSelectQuerySqlText(ISelectQuerySqlBuilder builder) {
+			return builder.Build(this);
+		}
 		protected virtual IEnumerable<T> Execute<T>(string selectSql, Func<IDataReader, T> readFunc) {
 			var customSqlCommand = new CustomExecuteSqlCommand(DbEngine);
 			return customSqlCommand.Execute(selectSql, readFunc);
-		}
-		protected virtual string GetSelectQuerySqlText(ISelectQuerySqlBuilder builder) {
-			return builder.Build(this);
 		}
 		protected virtual ISelectQuerySqlBuilder GetSelectQuerySqlBuilder() {
 			return DbEngine.GetSelectQuerySqlBuilder();

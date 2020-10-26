@@ -16,15 +16,11 @@ namespace EntityDataFramework.Core.Models.Query.Join {
 			Condition = condition;
 			Alias = alias;
 		}
-		//public static bool operator ==(QueryJoin queryJoin1, QueryJoin queryJoin2) {
-		//	return queryJoin1?.MainTableName == queryJoin2?.MainTableName &&
-		//		queryJoin1?.MainTableColumnName == queryJoin2?.MainTableColumnName &&
-		//		queryJoin1?.JoinTableName == queryJoin2?.JoinTableName &&
-		//		queryJoin1?.JoinTableColumnName == queryJoin2?.JoinTableColumnName &&
-		//		queryJoin1?.Alias == queryJoin2?.Alias;
-		//}
-		//public static bool operator !=(QueryJoin queryJoin1, QueryJoin queryJoin2) {
-		//	return !(queryJoin1 == queryJoin2);
-		//}
+		public static bool operator ==(QueryJoin queryJoin1, QueryJoin queryJoin2) {
+			return queryJoin1?.Alias == queryJoin2?.Alias;
+		}
+		public static bool operator !=(QueryJoin queryJoin1, QueryJoin queryJoin2) {
+			return !(queryJoin1 == queryJoin2);
+		}
 	}
 }
